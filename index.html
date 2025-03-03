@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jayi Dental Care & Orthodontic Center - Best Dentist in Nagpur | Best Orthodontist in Besa</title>
     <meta name="description" content="Jayi Dental Care & Orthodontic Center is the best dentist in Nagpur and Besa. Book your appointment now for advanced dental care and orthodontic treatments.">
-    <meta name="keywords" content="Best Dentist in Nagpur, Best Dentist near me, Best Orthodontist in Nagpur, Best Dentist in Besa, Dental Care Nagpur, Orthodontic Center Nagpur">
+    <meta name="keywords" content="Best Dentist in Nagpur, Best Dentist near me, Best Orthodontist in Nagpur, Best Dentist in Besa, Dental Care Nagpur, Orthodontic Center Nagpur, Best Dental Clinic near me, Best dental clinic in Nagpur, Best dental clinic in Besa, Best dental clinic in Manewada, Dental clinic in Nagpur, Dental Clinic in Besa, Dental Clinic in Manewada, Dental clinic near me, Dental clinic in Manish Nagar, Dental Clinic in New Manish Nagar, Best Dentist in Manish Nagar, Best dentist in New Manish Nagar">
+    <meta name="author" content="Jayi Dental Care & Orthodontic Center">
+    <link rel="canonical" href="https://www.jayidentalcare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -699,6 +701,41 @@
                 behavior: 'smooth'
             });
         }
+
+        // Dynamic Time Slot Filtering
+        document.getElementById('appointmentDate').addEventListener('change', function() {
+            const selectedDate = new Date(this.value);
+            const today = new Date();
+            const timeSelect = document.getElementById('appointmentTime');
+
+            if (selectedDate.toDateString() === today.toDateString()) {
+                const currentTime = new Date();
+                const currentHours = currentTime.getHours();
+                const currentMinutes = currentTime.getMinutes();
+
+                Array.from(timeSelect.options).forEach(option => {
+                    if (option.value) {
+                        const [time, modifier] = option.value.split(' ');
+                        let [hours, minutes] = time.split(':');
+                        hours = parseInt(hours);
+                        minutes = parseInt(minutes);
+
+                        if (modifier === 'PM' && hours !== 12) hours += 12;
+                        if (modifier === 'AM' && hours === 12) hours = 0;
+
+                        const slotTime = new Date();
+                        slotTime.setHours(hours, minutes, 0, 0);
+
+                        const timeDifference = (slotTime - currentTime) / (1000 * 60); // Difference in minutes
+                        option.disabled = timeDifference < 30;
+                    }
+                });
+            } else {
+                Array.from(timeSelect.options).forEach(option => {
+                    option.disabled = false;
+                });
+            }
+        });
     </script>
 </body>
 </html>
