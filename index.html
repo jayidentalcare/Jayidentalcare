@@ -476,7 +476,7 @@
                 <input type="text" placeholder="Your Full Name" required oninput="validateName(this)">
                 <input type="number" placeholder="Your Age" required min="1" max="100" oninput="validateAge(this)">
                 <input type="tel" placeholder="Your Phone Number" required oninput="validatePhone(this)">
-                <input type="date" id="appointmentDate" min="2025-03-01" placeholder="Select Date" required>
+                <input type="date" id="appointmentDate" placeholder="Select Date" required>
                 <select id="appointmentTime" required>
                     <option value="">Select Time</option>
                     <option value="11:00 AM">11:00 AM</option>
@@ -616,99 +616,24 @@
     </div>
 
     <script>
-        document.getElementById('appointmentForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('appointmentDate').setAttribute('min', today);
 
-            const name = document.querySelector('input[type="text"]').value;
-            const age = document.querySelector('input[type="number"]').value;
-            const phone = document.querySelector('input[type="tel"]').value;
-            const date = document.getElementById('appointmentDate').value;
-            const time = document.getElementById('appointmentTime').value;
-
-            if (!name.match(/^[A-Za-z ]+$/)) {
-                alert('Please enter a valid name (only alphabets and spaces allowed).');
-                return;
-            }
-
-            if (!age || age < 1 || age > 100) {
-                alert('Please enter a valid age (between 1 and 100).');
-                return;
-            }
-
-            if (!phone.match(/^[0-9]{10}$/)) {
-                alert('Please enter a valid 10-digit phone number.');
-                return;
-            }
-
-            if (!date) {
-                alert('Please select an appointment date.');
-                return;
-            }
-
-            if (!time) {
-                alert('Please select an appointment time.');
-                return;
-            }
-
-            const data = {
-                name: name,
-                age: age,
-                phone: phone,
-                date: date,
-                time: time
-            };
-
-            fetch('https://script.google.com/macros/s/AKfycbwN6U83XUY3pelzh9LRjOfpVlkMv3CRu0-nWn1SU1LrFse9l4fNcb-j8tEtDOS7Gco_7A/exec', {
-                method: 'POST',
-                body: JSON.stringify(data),
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                mode: 'no-cors'
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.text();
-            })
-            .then(message => {
-                alert('Appointment booked successfully! We will confirm via SMS.');
-                document.getElementById('appointmentForm').reset();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Thank you! Your appointment has been booked. We\'ll call you to confirm.');
-            });
-        });
-
-        function validateName(input) {
-            input.value = input.value.replace(/[^A-Za-z ]/g, '');
-        }
-
-        function validateAge(input) {
-            if (input.value < 1 || input.value > 100) {
-                input.setCustomValidity('Age must be between 1 and 100.');
-            } else {
-                input.setCustomValidity('');
-            }
-        }
-
-        function validatePhone(input) {
-            input.value = input.value.replace(/\D/g, '').substring(0, 10);
-        }
-
-        function scrollToBooking() {
-            document.getElementById('booking').scrollIntoView({
-                behavior: 'smooth'
-            });
-        }
-
-        // Dynamic Time Slot Filtering
-        document.getElementById('appointmentDate').addEventListener('change', function() {
-            const selectedDate = new Date(this.value);
-            const today = new Date();
+        // Function to disable past time slots
+        function updateTimeSlots() {
+            const dateInput = document.getElementById('appointmentDate');
             const timeSelect = document.getElementById('appointmentTime');
+            const selectedDate = new Date(dateInput.value);
+            const currentDate = new Date();
 
-            if (selectedDate.toDateString() === today.toDateString()) {
+            // Reset all options
+            Array.from(timeSelect.options).forEach(option => {
+                option.disabled = false;
+            });
+
+            // If selected date is today, disable past times
+            if (selectedDate.toDateString() === currentDate.toDateString()) {
                 const currentTime = new Date();
                 const currentHours = currentTime.getHours();
                 const currentMinutes = currentTime.getMinutes();
@@ -727,15 +652,117 @@
                         slotTime.setHours(hours, minutes, 0, 0);
 
                         const timeDifference = (slotTime - currentTime) / (1000 * 60); // Difference in minutes
-                        option.disabled = timeDifference < 30;
+                        option.disabled = timeDifference < 30; // Disable if less than 30 minutes
                     }
                 });
-            } else {
-                Array.from(timeSelect.options).forEach(option => {
-                    option.disabled = false;
-                });
             }
-        });
+        }
+
+        // Attach event listener to date input
+        document.getElementById('appointmentDate').addEventListener('change', updateTimeSlots);
+
+        // Form submission handling
+       document.getElementById('appointmentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const name = document.querySelector('input[type="text"]').value;
+    const age = document.querySelector('input[type="number"]').value;
+    const phone = document.querySelector('input[type="tel"]').value;
+    const date = document.getElementById('appointmentDate').value;
+    const time = document.getElementById('appointmentTime').value;
+
+    if (!name.match(/^[A-Za-z ]+$/)) {
+        alert('Please enter a valid name (only alphabets and spaces allowed).');
+        return;
+    }
+
+    if (!age || age < 1 || age > 100) {
+        alert('Please enter a valid age (between 1 and 100).');
+        return;
+    }
+
+    if (!phone.match(/^[0-9]{10}$/)) {
+        alert('Please enter a valid 10-digit phone number.');
+        return;
+    }
+
+    if (phone.startsWith('0')) {
+        alert('Phone number should not start with 0.');
+        return;
+    }
+
+    if (!date) {
+        alert('Please select an appointment date.');
+        return;
+    }
+
+    if (!time) {
+        alert('Please select an appointment time.');
+        return;
+    }
+
+    const data = {
+        name: name,
+        age: age,
+        phone: phone,
+        date: date,
+        time: time
+    };
+
+    fetch('https://script.google.com/macros/s/AKfycbwN6U83XUY3pelzh9LRjOfpVlkMv3CRu0-nWn1SU1LrFse9l4fNcb-j8tEtDOS7Gco_7A/exec', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        mode: 'no-cors'
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.text();
+    })
+    .then(message => {
+        alert('Appointment booked successfully! We will confirm via SMS.');
+        // Reset the form fields
+        document.getElementById('appointmentForm').reset();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Thank you! Your appointment has been booked. We\'ll call you to confirm.');
+        // Reset the form fields even if there's an error
+        document.getElementById('appointmentForm').reset();
+    });
+});
+
+        function validateName(input) {
+            input.value = input.value.replace(/[^A-Za-z ]/g, '');
+        }
+
+        function validateAge(input) {
+            if (input.value < 1 || input.value > 100) {
+                input.setCustomValidity('Age must be between 1 and 100.');
+            } else {
+                input.setCustomValidity('');
+            }
+        }
+
+        function validatePhone(input) {
+    // Remove all non-digit characters and limit to 10 digits
+    input.value = input.value.replace(/\D/g, '').substring(0, 10);
+
+    // Check if the phone number starts with 0
+    if (input.value.startsWith('0')) {
+        input.setCustomValidity('Phone number should not start with 0.');
+    } else {
+        input.setCustomValidity('');
+    }
+}
+
+        function scrollToBooking() {
+            document.getElementById('booking').scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
     </script>
 </body>
 </html>
