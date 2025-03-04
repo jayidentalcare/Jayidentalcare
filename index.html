@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="google-site-verification" content="l2PRpXExzrjSek-_UOYsrDMszbWMHzvN_JSV_l8eWPg" /> 
     <title>Jayi Dental Care & Orthodontic Center - Best Dentist in Nagpur | Best Orthodontist in Besa</title>
     <meta name="description" content="Jayi Dental Care & Orthodontic Center is the best dentist in Nagpur and Besa. Book your appointment now for advanced dental care and orthodontic treatments.">
     <meta name="keywords" content="Best Dentist in Nagpur, Best Dentist near me, Best Orthodontist in Nagpur, Best Dentist in Besa, Dental Care Nagpur, Orthodontic Center Nagpur, Best Dental Clinic near me, Best dental clinic in Nagpur, Best dental clinic in Besa, Best dental clinic in Manewada, Dental clinic in Nagpur, Dental Clinic in Besa, Dental Clinic in Manewada, Dental clinic near me, Dental clinic in Manish Nagar, Dental Clinic in New Manish Nagar, Best Dentist in Manish Nagar, Best dentist in New Manish Nagar">
@@ -156,6 +155,14 @@
             background: #b71c1c;
             transform: translateY(-3px);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Loading Message */
+        .loading-message {
+            display: none;
+            color: #d32f2f;
+            font-size: 1.2rem;
+            margin-top: 1rem;
         }
 
         /* Services Section */
@@ -496,6 +503,7 @@
                     <option value="9:00 PM">9:00 PM</option>
                 </select>
                 <input type="submit" value="Submit">
+                <div class="loading-message" id="loadingMessage">Please wait while we book your appointment...</div>
             </form>
         </div>
     </section>
@@ -663,77 +671,84 @@
         document.getElementById('appointmentDate').addEventListener('change', updateTimeSlots);
 
         // Form submission handling
-       document.getElementById('appointmentForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+        document.getElementById('appointmentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
 
-    const name = document.querySelector('input[type="text"]').value;
-    const age = document.querySelector('input[type="number"]').value;
-    const phone = document.querySelector('input[type="tel"]').value;
-    const date = document.getElementById('appointmentDate').value;
-    const time = document.getElementById('appointmentTime').value;
+            const name = document.querySelector('input[type="text"]').value;
+            const age = document.querySelector('input[type="number"]').value;
+            const phone = document.querySelector('input[type="tel"]').value;
+            const date = document.getElementById('appointmentDate').value;
+            const time = document.getElementById('appointmentTime').value;
 
-    if (!name.match(/^[A-Za-z ]+$/)) {
-        alert('Please enter a valid name (only alphabets and spaces allowed).');
-        return;
-    }
+            if (!name.match(/^[A-Za-z ]+$/)) {
+                alert('Please enter a valid name (only alphabets and spaces allowed).');
+                return;
+            }
 
-    if (!age || age < 1 || age > 100) {
-        alert('Please enter a valid age (between 1 and 100).');
-        return;
-    }
+            if (!age || age < 1 || age > 100) {
+                alert('Please enter a valid age (between 1 and 100).');
+                return;
+            }
 
-    if (!phone.match(/^[0-9]{10}$/)) {
-        alert('Please enter a valid 10-digit phone number.');
-        return;
-    }
+            if (!phone.match(/^[0-9]{10}$/)) {
+                alert('Please enter a valid 10-digit phone number.');
+                return;
+            }
 
-    if (phone.startsWith('0')) {
-        alert('Phone number should not start with 0.');
-        return;
-    }
+            if (phone.startsWith('0')) {
+                alert('Phone number should not start with 0.');
+                return;
+            }
 
-    if (!date) {
-        alert('Please select an appointment date.');
-        return;
-    }
+            if (!date) {
+                alert('Please select an appointment date.');
+                return;
+            }
 
-    if (!time) {
-        alert('Please select an appointment time.');
-        return;
-    }
+            if (!time) {
+                alert('Please select an appointment time.');
+                return;
+            }
 
-    const data = {
-        name: name,
-        age: age,
-        phone: phone,
-        date: date,
-        time: time
-    };
+            const data = {
+                name: name,
+                age: age,
+                phone: phone,
+                date: date,
+                time: time
+            };
 
-    fetch('https://script.google.com/macros/s/AKfycbwN6U83XUY3pelzh9LRjOfpVlkMv3CRu0-nWn1SU1LrFse9l4fNcb-j8tEtDOS7Gco_7A/exec', {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        mode: 'no-cors'
-    })
-    .then(response => {
-        if (!response.ok) throw new Error('Network response was not ok');
-        return response.text();
-    })
-    .then(message => {
-        alert('Appointment booked successfully! We will confirm via SMS.');
-        // Reset the form fields
-        document.getElementById('appointmentForm').reset();
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Thank you! Your appointment has been booked. We\'ll call you to confirm.');
-        // Reset the form fields even if there's an error
-        document.getElementById('appointmentForm').reset();
-    });
-});
+            // Show loading message
+            document.getElementById('loadingMessage').style.display = 'block';
+
+            fetch('https://script.google.com/macros/s/AKfycbwN6U83XUY3pelzh9LRjOfpVlkMv3CRu0-nWn1SU1LrFse9l4fNcb-j8tEtDOS7Gco_7A/exec', {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                mode: 'no-cors'
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.text();
+            })
+            .then(message => {
+                alert('Appointment booked successfully! We will confirm via SMS.');
+                // Reset the form fields
+                document.getElementById('appointmentForm').reset();
+                // Hide loading message
+                document.getElementById('loadingMessage').style.display = 'none';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Thank you! Your appointment has been booked. We\'ll call you to confirm.');
+                // Reset the form fields even if there's an error
+                document.getElementById('appointmentForm').reset();
+                // Hide loading message
+                document.getElementById('loadingMessage').style.display = 'none';
+            });
+        });
 
         function validateName(input) {
             input.value = input.value.replace(/[^A-Za-z ]/g, '');
@@ -748,16 +763,16 @@
         }
 
         function validatePhone(input) {
-    // Remove all non-digit characters and limit to 10 digits
-    input.value = input.value.replace(/\D/g, '').substring(0, 10);
+            // Remove all non-digit characters and limit to 10 digits
+            input.value = input.value.replace(/\D/g, '').substring(0, 10);
 
-    // Check if the phone number starts with 0
-    if (input.value.startsWith('0')) {
-        input.setCustomValidity('Phone number should not start with 0.');
-    } else {
-        input.setCustomValidity('');
-    }
-}
+            // Check if the phone number starts with 0
+            if (input.value.startsWith('0')) {
+                input.setCustomValidity('Phone number should not start with 0.');
+            } else {
+                input.setCustomValidity('');
+            }
+        }
 
         function scrollToBooking() {
             document.getElementById('booking').scrollIntoView({
